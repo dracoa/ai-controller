@@ -1,22 +1,21 @@
-import json
 
 
 def detect(raw_bytes):
     x = {
-        "x": 10,
-        "y": 30,
-        "w": 200,
-        "h": 300,
-        "class": "test",
+        "x": 0,
+        "y": 0,
+        "w": 10,
+        "h": 10,
+        "class": "1",
     }
     y = {
-        "x": 910,
-        "y": 230,
-        "w": 20,
-        "h": 300,
-        "class": "test2",
+        "x": 1910,
+        "y": 1070,
+        "w": 10,
+        "h": 10,
+        "class": "2",
     }
-    return json.dumps({
+    return {
         "type": "boxes",
         "boxes": [x, y],
-    })
+    }

@@ -4,6 +4,7 @@ import mss
 import mss.tools
 from detector import detect
 
+
 class MssWorker(threading.Thread):
     def __init__(self, msg_worker):
         threading.Thread.__init__(self)
@@ -16,7 +17,7 @@ class MssWorker(threading.Thread):
     def run(self):
         self.stopFlag = False
         with mss.mss() as sct:
-            monitor_number = 1  # TODO - change monitor on the fly
+            monitor_number = 3  # TODO - change monitor on the fly
             mon = sct.monitors[monitor_number]
             print(mon)
             monitor = {
@@ -29,6 +30,5 @@ class MssWorker(threading.Thread):
             while not self.stopFlag:
                 im = sct.grab(monitor)
                 raw_bytes = mss.tools.to_png(im.rgb, im.size)
-                self.msgWorker.sendData(raw_bytes)
-                boxes = detect(raw_bytes)
-                self.msgWorker.sendData(boxes)
+                self.msgWorker.send_binary(raw_bytes)
+                self.msgWorker.send_json(detect(raw_bytes))

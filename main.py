@@ -1,22 +1,13 @@
 #!/usr/bin/env python3
 import sys
-import time
 import websockets
 import asyncio
-import threading
-from extra import MssWorker
+import json
+from screen import MssWorker
+from info import InputWorker
 
 sys.path.append('.')
 stopFlag = False
-
-
-class InputWorker(threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-
-    def run(self):
-        while not stopFlag:
-            time.sleep(1)
 
 
 class WsWorker:
@@ -35,17 +26,23 @@ class WsWorker:
         finally:
             self.connected.remove(websocket)
 
-    def sendData(self, data):
+    def send_data(self, data):
         for websocket in self.connected.copy():
             coro = websocket.send(data)
             _ = asyncio.run_coroutine_threadsafe(coro, loop)
+
+    def send_binary(self, data):
+        self.send_data(data)
+
+    def send_json(self, data):
+        self.send_data(json.dumps(data))
 
 
 if __name__ == "__main__":
     print('ai-controller server')
     msgWorker = WsWorker()
     mssWorker = MssWorker(msgWorker)
-    inputWorker = InputWorker()
+    inputWorker = InputWorker(msgWorker)
     try:
         mssWorker.start()
         inputWorker.start()
