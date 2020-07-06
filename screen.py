@@ -2,7 +2,10 @@
 import threading
 import mss
 import mss.tools
-from detector import detect
+from skillautocast import update_screen
+import time
+from PIL import Image
+import io
 
 
 class MssWorker(threading.Thread):
@@ -16,8 +19,9 @@ class MssWorker(threading.Thread):
 
     def run(self):
         self.stopFlag = False
+
         with mss.mss() as sct:
-            monitor_number = 3  # TODO - change monitor on the fly
+            monitor_number = 1  # TODO - change monitor on the fly
             mon = sct.monitors[monitor_number]
             print(mon)
             monitor = {
@@ -28,7 +32,14 @@ class MssWorker(threading.Thread):
                 "mon": monitor_number,
             }
             while not self.stopFlag:
-                im = sct.grab(monitor)
-                raw_bytes = mss.tools.to_png(im.rgb, im.size)
-                self.msgWorker.send_binary(raw_bytes)
-                self.msgWorker.send_json(detect(raw_bytes))
+                sct_img = sct.grab(monitor)
+                img = Image.frombytes("RGB", sct_img.size, sct_img.bgra, "raw", "BGRX")
+                imgBytes = io.BytesIO()
+                img.save(imgBytes, format="JPEG")
+                self.msgWorker.send_binary(imgBytes.getvalue())
+                result = update_screen(img)
+                self.msgWorker.send_json({
+                    "type": "info",
+                    "autoCast": result
+                })
+                time.sleep(1 / 30)

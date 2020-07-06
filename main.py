@@ -4,7 +4,7 @@ import websockets
 import asyncio
 import json
 from screen import MssWorker
-from info import InputWorker
+from input import InputWorker
 
 sys.path.append('.')
 stopFlag = False
